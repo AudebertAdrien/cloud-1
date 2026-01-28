@@ -1,25 +1,18 @@
 ---
-tasks:
 - name: Ensure dependencies are installed
   ansible.builtin.package:
     name:
       - ca-certificates
     state: present
 
-- name: Create Docker GPG key directory
-  ansible.builtin.file:
-    path: /etc/apt/keyrings
-    state: directory
-    mode: "0755"
-
 - name: Add Docker GPG apt Key
   ansible.builtin.apt_key:
-    url: https://download.docker.com/linux/ubuntu/gpg
+    url: "https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }}/gpg"
     state: present
 
 - name: Add Docker Repository
   ansible.builtin.apt_repository:
-    repo: deb [arch={{ ansible_architecture }}] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    repo: "deb [arch=amd64] https://download.docker.com/linux/{{ ansible_facts['distribution'] | lower }} {{ ansible_facts['distribution_release'] }} stable"
     state: present
 
 - name: Update apt cache after adding Docker repository
@@ -44,6 +37,6 @@ tasks:
 
 - name: Add ubuntu user to docker group
   ansible.builtin.user:
-    name: {{ user }}
+    name: "{{ user }}"
     groups: docker
     append: yes
