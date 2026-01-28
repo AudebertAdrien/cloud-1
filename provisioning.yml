@@ -1,0 +1,5 @@
+---
+- name: Provisioning  servers
+  hosts: servers
+  roles:
+    - role: cloud_1

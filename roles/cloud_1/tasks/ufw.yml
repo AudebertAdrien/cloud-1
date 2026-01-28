@@ -1,0 +1,33 @@
+---
+- name: Install UFW
+  ansible.builtin.apt:
+    name: ufw
+    state: present
+
+- name: Ensure UFW service is enabled in Systemd
+  service:
+    name: ufw
+    enabled: yes
+    state: started
+
+- name: Allow SSH
+  ufw:
+    rule: allow
+    port: '22'
+    proto: 'tcp'
+
+- name: Allow HTTP
+  ufw:
+    rule: allow
+    port: '80'
+    proto: 'tcp'
+
+- name: Allow HTTPS
+  ufw:
+    rule: allow
+    port: '443'
+    proto: tcp
+
+- name: Enable Firewall (The Switch ON)
+  ufw:
+    state: enabled
