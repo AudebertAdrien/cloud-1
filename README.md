@@ -100,12 +100,9 @@ make ssh
 
 ## 🛠️ Utilities
 
-If you reboot your instance and the IP address changes:
+If you reboot your instance and the IP address changes or change you ssh key:
+You should remove old knows hosts
 
-1. Update `HOST_IP` in the `Makefile`
-2. Run the following command to fix SSH connection errors:
-
-```bash
 make clean_known_hosts
 ```
 
