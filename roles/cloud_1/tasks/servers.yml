@@ -3,4 +3,12 @@
   ansible.builtin.apt:
     update_cache: yes
 
+- name: Install common packages
+  ansible.builtin.apt:
+    name:
+      - ufw
+      - python3-pip
+      - python3-cryptography
+      - python3-openssl
+    state: present
 

@@ -1,3 +1,7 @@
 #SPDX-License-Identifier: MIT-0
 ---
 # vars file for roles/cloud_1
+db_root_password: "rootpasswordStrong!"
+db_name: "wordpress"
+db_user: "wp_user"
+db_password: "userpasswordStrong!"

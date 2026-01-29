@@ -10,3 +10,5 @@
 - name: Install Docker ecosystem
   import_tasks: docker.yml
 
+- name: Deploy Cloud-1 Stack
+  import_tasks: deploy.yml
