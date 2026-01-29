@@ -1,4 +1,8 @@
-# Cloud-1 ☁️
+# Cloud-1 ☁️☁️☁️
+
+Automated
+
+Automated
 
 Automated deployment of a secure WordPress infrastructure on a remote cloud server (GCP) using **Ansible** and **Docker**.
 
