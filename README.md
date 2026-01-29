@@ -1,8 +1,4 @@
-# Cloud-1 ☁️☁️☁️
-
-Automated
-
-Automated
+# Cloud-1 ☁️
 
 Automated deployment of a secure WordPress infrastructure on a remote cloud server (GCP) using **Ansible** and **Docker**.
 
@@ -55,7 +51,7 @@ This will create:
 #### B. Authorize the key
 
 1. Copy the content of `cloud_1-key.pub`
-2. Go to your Cloud Provider and add the public key to your instance
+3. Go to your Cloud Provider and add the public key to your instance
 
 ---
 
