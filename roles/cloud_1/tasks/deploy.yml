@@ -31,7 +31,7 @@
 
 - name: Copy .env file
   ansible.builtin.template:
-    src: .env.j2
+    src: template.env.j2
     dest: /opt/cloud_1/.env
     owner: root
     group: root
