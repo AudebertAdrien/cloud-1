@@ -127,7 +127,14 @@ make ssh
 
 **SSH Connection Issues:**
 
-If you reboot your instance (IP change) or regenerate your keys, you might encounter a "Remote Host Identification Changed" error due to a host fingerprint mismatch.
+- If you reboot your instance (IP change) or regenerate your keys, you might encounter a "Remote Host Identification Changed" error due to a host fingerprint mismatch.
+
+- Or if you encounter this kind of message
+```
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+```
 
 Run this command to clean your local `known_hosts` file for this specific IP:
 

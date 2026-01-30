@@ -1,7 +1,7 @@
 all: 
   hosts:
     instance_1:
-      ansible_host: 34.175.45.76
+      ansible_host: XX.XX.XX.XX
 
   children:
     prod:

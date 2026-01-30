@@ -2,7 +2,7 @@ SECRETS_DRAFT = secrets.template.yml
 SECRETS_FINAL = roles/cloud_1/vars/main.yml
 VAULT_PASS = .vault_pass
 
-HOST_IP = 34.175.45.76
+HOST_IP = XX.XX.XX.XX
 SSH_USER = cloud_1-user
 
 INVENTORY = inventory
