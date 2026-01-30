@@ -59,7 +59,7 @@ Open `inventory.yml` and replace the IP address in the `ansible_host` field:
 Example:
 
 ```yaml
-ansible_host: 34.155.XXX.XXX
+ansible_host: 34.155.XXX.XXX    # Replace with your Instance Public IP
 ```
 
 ### 4. Secrets Management (Ansible Vault)
