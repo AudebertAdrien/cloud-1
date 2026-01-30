@@ -35,10 +35,6 @@ Update the Ansible inventory file with your instance IP address.
 
 Open `inventory.yml` and replace the IP address in the `ansible_host` field:
 
-```yaml
-  ansible_host: YOUR_INSTANCE_IP  # Replace with your Cloud Instance Public IP
-```
-
 Example:
 
 ```yaml
