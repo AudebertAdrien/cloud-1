@@ -1,6 +1,6 @@
 # Cloud-1 ☁️
 
-Automated deployment of a secure WordPress infrastructure on a remote cloud server (GCP/AWS) using Ansible and Docker.
+Automated deployment of a secure WordPress infrastructure on a remote cloud server (GCP) using Ansible and Docker.
 
 The deployment follows the "Inception" architecture:
 
@@ -73,7 +73,15 @@ This project uses Ansible Vault to encrypt sensitive data (passwords, API keys).
 2. Create a file named `.vault_pass` at the root of the project.
 3. Paste the password inside (no spaces, no new lines).
 
-#### B. Edit Secrets (Optional):
+#### B. View Secrets (Optional):
+
+If you want to view the encrypted variables:
+
+```bash
+make secrets-view
+```
+
+#### C. Edit Secrets (Optional):
 
 If you have the correct `.vault_pass` file, you can view or edit the encrypted variables:
 
