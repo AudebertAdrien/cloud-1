@@ -83,7 +83,7 @@ make secrets-view
 
 #### C. Edit Secrets (Optional):
 
-If you have the correct `.vault_pass` file, you can view or edit the encrypted variables:
+If you have the correct `.vault_pass` file, you can edit the encrypted variables:
 
 ```bash
 make secrets-edit
