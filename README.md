@@ -8,40 +8,19 @@ The deployment follows the "Inception" architecture:
 - WordPress + MariaDB
 - Self-signed TLS Certificates
 
-## 📋 Prerequisites
+## Prerequisites
 
 Before starting, ensure you have:
 
 - Ansible and Make installed on your local machine.
 - A running Cloud Instance (Debian 12 or Ubuntu 20.04+).
 - Inbound Ports allowed on your cloud provider firewall:
-  - 22 (SSH)
   - 80 (HTTP)
   - 443 (HTTPS)
 
-## 🚀 Quick Start
+## Quick Start
 
-### 1. Configuration
-
-Open the Makefile at the root of the project and edit the top variable with your instance IP:
-
-```
-HOST_IP = 34.155.XXX.XXX    # Replace with your Instance Public IP
-```
-
-### 2. Inventory Setup
-
-Update the Ansible inventory file with your instance IP address.
-
-Open `inventory.yml` and replace the IP address in the `ansible_host` field:
-
-Example:
-
-```yaml
-ansible_host: 34.155.XXX.XXX
-```
-
-### 3. SSH Key Setup
+### 1. SSH Key Setup
 
 You need to generate a dedicated SSH key for this project and upload the public part to your cloud provider for secure authentication.
 
@@ -63,7 +42,27 @@ cat cloud_1-key.pub
 
 Go to your Cloud Provider (GCP) and add this key to your instance.
 
-### 4. Secrets Management (Ansible Vault) 🔐
+### 2. Configuration
+
+Open the Makefile at the root of the project and edit the top variable with your instance IP:
+
+```
+HOST_IP = 34.155.XXX.XXX    # Replace with your Instance Public IP
+```
+
+### 3. Inventory Setup
+
+Update the Ansible inventory file with your instance IP address.
+
+Open `inventory.yml` and replace the IP address in the `ansible_host` field:
+
+Example:
+
+```yaml
+ansible_host: 34.155.XXX.XXX
+```
+
+### 4. Secrets Management (Ansible Vault)
 
 This project uses Ansible Vault to encrypt sensitive data (passwords, API keys).
 
@@ -104,7 +103,7 @@ Ansible will automatically:
 - Generate self-signed TLS certificates.
 - Start the container stack.
 
-## 🌐 Access
+## Access
 
 ### Web Access
 
@@ -124,7 +123,7 @@ To connect to your server via SSH using the project key:
 make ssh
 ```
 
-## 🛠️ Troubleshooting & Utilities
+## Troubleshooting & Utilities
 
 **SSH Connection Issues:**
 
