@@ -38,7 +38,7 @@ Open `inventory.yml` and replace the IP address in the `ansible_host` field:
 Example:
 
 ```yaml
-ansible_host: 34.163.40.64
+ansible_host: 34.155.XXX.XXX
 ```
 
 ### 3. SSH Key Setup
