@@ -19,9 +19,11 @@ key:
 	@echo "👉 Copy the content of '$(KEY_FILE).pub' into the Google Cloud console (SSH Metadata)."
 
 secrets-view:
+	@echo "🔍 Viewing encrypted secrets..."
 	@ansible-vault view roles/cloud_1/vars/secrets.yml
 
 secrets-edit:
+	@echo "✏️  Opening encrypted secrets for editing..."
 	@ansible-vault edit roles/cloud_1/vars/secrets.yml
 
 install:
