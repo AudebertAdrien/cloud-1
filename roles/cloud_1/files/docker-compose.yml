@@ -26,9 +26,7 @@ services:
     restart: always
     depends_on:
       - db
-    environment:
-      PMA_HOST: db
-      MYSQL_ROOT_PASSWORD: "{{ db_root_password }}"
+    env_file: .env
     networks:
       - inception
 

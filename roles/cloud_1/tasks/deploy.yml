@@ -33,15 +33,18 @@
   ansible.builtin.template:
     src: .env.j2
     dest: /opt/cloud_1/.env
+    owner: root
+    group: root
+    mode: '0600'
 
 - name: Copy Nginx config
-  ansible.builtin.template:
-    src: nginx.conf.j2
+  ansible.builtin.copy:
+    src: nginx.conf
     dest: /opt/cloud_1/nginx.conf
 
 - name: Copy docker-compose file
-  ansible.builtin.template:
-    src: docker-compose.yml.j2
+  ansible.builtin.copy:
+    src: docker-compose.yml
     dest: /opt/cloud_1/docker-compose.yml
 
 - name: Tear down existing services
