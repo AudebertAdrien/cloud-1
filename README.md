@@ -29,7 +29,23 @@ Open the Makefile at the root of the project and edit the top variable with your
 HOST_IP = 34.155.XXX.XXX    # Replace with your Instance Public IP
 ```
 
-### 2. SSH Key Setup
+### 2. Inventory Setup
+
+Update the Ansible inventory file with your instance IP address.
+
+Open `inventory.yml` and replace the IP address in the `ansible_host` field:
+
+```yaml
+  ansible_host: YOUR_INSTANCE_IP  # Replace with your Cloud Instance Public IP
+```
+
+Example:
+
+```yaml
+ansible_host: 34.163.40.64
+```
+
+### 3. SSH Key Setup
 
 You need to generate a dedicated SSH key for this project and upload the public part to your cloud provider for secure authentication.
 
@@ -51,7 +67,7 @@ cat cloud_1-key.pub
 
 Go to your Cloud Provider (GCP) and add this key to your instance.
 
-### 3. Secrets Management (Ansible Vault) 🔐
+### 4. Secrets Management (Ansible Vault) 🔐
 
 This project uses Ansible Vault to encrypt sensitive data (passwords, API keys).
 
@@ -69,7 +85,7 @@ If you have the correct `.vault_pass` file, you can view or edit the encrypted v
 make secrets-edit
 ```
 
-### 4. Deployment
+### 5. Deployment
 
 Once configuration is done, launch the automated installation:
 
