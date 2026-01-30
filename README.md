@@ -1,76 +1,88 @@
 # Cloud-1 ☁️
 
-Automated deployment of a secure WordPress infrastructure on a remote cloud server (GCP) using **Ansible** and **Docker**.
+Automated deployment of a secure WordPress infrastructure on a remote cloud server (GCP/AWS) using Ansible and Docker.
 
----
+The deployment follows the "Inception" architecture:
+
+- Nginx (Reverse Proxy & TLS)
+- WordPress + MariaDB
+- Self-signed TLS Certificates
 
 ## 📋 Prerequisites
 
 Before starting, ensure you have:
 
-* **Ansible** and **Make** installed on your local machine
-* A running **Cloud Instance**:
-
-  * Debian 12 **or**
-  * Ubuntu 20.04+
-* Inbound ports allowed on your cloud firewall:
-
-  * `22` (SSH)
-  * `80` (HTTP)
-  * `443` (HTTPS)
-
----
+- Ansible and Make installed on your local machine.
+- A running Cloud Instance (Debian 12 or Ubuntu 20.04+).
+- Inbound Ports allowed on your cloud provider firewall:
+  - 22 (SSH)
+  - 80 (HTTP)
+  - 443 (HTTPS)
 
 ## 🚀 Quick Start
 
 ### 1. Configuration
 
-Open the `Makefile` at the root of the project and edit the top variables with your instance details:
+Open the Makefile at the root of the project and edit the top variable with your instance IP:
 
-```makefile
-HOST_IP = 34.155.XXX.XXX    # Your Instance Public IP
 ```
-
----
+HOST_IP = 34.155.XXX.XXX    # Replace with your Instance Public IP
+```
 
 ### 2. SSH Key Setup
 
-Generate a dedicated SSH key for this project and authorize it on your server.
+You need to generate a dedicated SSH key for this project and upload the public part to your cloud provider for secure authentication.
 
-#### A. Generate the key
+#### A. Generate the key:
 
 ```bash
 make key
 ```
 
-This will create:
+This will create `cloud_1-key` (private) and `cloud_1-key.pub` (public).
 
-* `cloud_1-key` (private key)
-* `cloud_1-key.pub` (public key)
+#### B. Authorize the key:
 
-#### B. Authorize the key
+Copy the content of the public key:
 
-1. Copy the content of `cloud_1-key.pub`
-3. Go to your Cloud Provider and add the public key to your instance
+```bash
+cat cloud_1-key.pub
+```
 
----
+Go to your Cloud Provider (GCP) and add this key to your instance.
 
-### 3. Deployment
+### 3. Secrets Management (Ansible Vault) 🔐
 
-Launch the automated installation:
+This project uses Ansible Vault to encrypt sensitive data (passwords, API keys).
+
+#### A. Setup the Vault Password:
+
+1. Ask the project administrator for the Vault Password.
+2. Create a file named `.vault_pass` at the root of the project.
+3. Paste the password inside (no spaces, no new lines).
+
+#### B. Edit Secrets (Optional):
+
+If you have the correct `.vault_pass` file, you can view or edit the encrypted variables:
+
+```bash
+make secrets-edit
+```
+
+### 4. Deployment
+
+Once configuration is done, launch the automated installation:
 
 ```bash
 make install
 ```
 
-Ansible will:
+Ansible will automatically:
 
-* Configure the server
-* Set up security (**UFW**)
-* Generate TLS certificates
-* Start the Docker containers
-
----
+- Configure the server and install Docker.
+- Set up the firewall (UFW).
+- Generate self-signed TLS certificates.
+- Start the container stack.
 
 ## 🌐 Access
 
@@ -82,28 +94,24 @@ Open your browser and navigate to:
 https://<YOUR_HOST_IP>
 ```
 
-⚠️ **Note**
-You will see a security warning because the TLS certificate is **self-signed**.
-This is expected. Click **Advanced → Proceed** to access the site.
-
----
+**Note:** Since the SSL certificate is self-signed, your browser will display a security alert. This is expected. Click **Advanced → Proceed** (or "Accept Risk") to access the site.
 
 ### Server Access
 
-To connect to your server via SSH using the generated key:
+To connect to your server via SSH using the project key:
 
 ```bash
 make ssh
 ```
 
----
+## 🛠️ Troubleshooting & Utilities
 
-## 🛠️ Utilities
+**SSH Connection Issues:**
 
-If you reboot your instance and the IP address changes or change you ssh key:
-You should remove old knows hosts
+If you reboot your instance (IP change) or regenerate your keys, you might encounter a "Remote Host Identification Changed" error due to a host fingerprint mismatch.
 
+Run this command to clean your local `known_hosts` file for this specific IP:
+
+```bash
 make clean_known_hosts
 ```
-
----

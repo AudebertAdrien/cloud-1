@@ -1,5 +1,8 @@
-HOST_IP = 34.155.147.233
+SECRETS_DRAFT = secrets.template.yml
+SECRETS_FINAL = roles/cloud_1/vars/main.yml
+VAULT_PASS = .vault_pass
 
+HOST_IP = 34.163.40.64
 SSH_USER = cloud_1-user
 
 INVENTORY = inventory
@@ -14,6 +17,12 @@ key:
 	chmod 600 $(KEY_FILE)
 	@echo "✅ Key generated!"
 	@echo "👉 Copy the content of '$(KEY_FILE).pub' into the Google Cloud console (SSH Metadata)."
+
+secrets-view:
+	@ansible-vault view roles/cloud_1/vars/secrets.yml
+
+secrets-edit:
+	@ansible-vault edit roles/cloud_1/vars/secrets.yml
 
 install:
 	@echo "Launching provisioning on $(HOST_IP)..."

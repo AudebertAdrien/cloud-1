@@ -12,3 +12,6 @@
       - python3-openssl
     state: present
 
+- name: Include encrypted secrets
+  include_vars: secrets.yml
+  #no_log: true
