@@ -1,0 +1,10 @@
+# GCP Project Configuration
+# Copy this file to terraform.tfvars and fill in your values
+
+project_id           = "your-gcp-project-id"
+project_name         = "cloud-1-wordpress"
+region               = "us-central1"
+zone                 = "us-central1-a"
+machine_type         = "e2-micro"
+ssh_user             = "ubuntu"
+ssh_public_key_path  = "~/.ssh/id_rsa.pub"
