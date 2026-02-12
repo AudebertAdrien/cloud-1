@@ -1,53 +1,4 @@
-# main.tf - Core infrastructure for WordPress hosting
-# NOTE: This creates a single-instance WordPress setup. For production,
-# consider using a managed instance group with Cloud SQL.
-
-terraform {
-  required_version = ">= 1.0"
-
-  required_providers {
-    google = {
-      source  = "hashicorp/google"
-      version = "~> 5.0"
-    }
-  }
-}
-
-provider "google" {
-  project = var.project_id
-  region  = var.region
-  zone    = var.zone
-}
-
-locals {
-  common_labels = {
-    project     = var.project_name
-    managed_by  = "terraform"
-  }
-
-  ingress_rules = {
-    ssh = {
-      description   = "Allow SSH for remote administration"
-      port          = "22"
-      source_ranges = var.ssh_source_ranges
-    }
-    http = {
-      description   = "Allow HTTP traffic"
-      port          = "80"
-      source_ranges = ["0.0.0.0/0"]
-    }
-    https = {
-      description   = "Allow HTTPS traffic"
-      port          = "443"
-      source_ranges = ["0.0.0.0/0"]
-    }
-  }
-}
-
-
 # NETWORKING
-
-
 resource "google_compute_network" "main" {
   name                    = "${var.project_name}-vpc"
   auto_create_subnetworks = false
@@ -59,11 +10,10 @@ resource "google_compute_subnetwork" "main" {
   ip_cidr_range            = var.subnet_cidr
   region                   = var.region
   network                  = google_compute_network.main.id
-  private_ip_google_access = true  # Allow access to Google APIs
+  private_ip_google_access = true
 }
 
 # FIREWALL RULES
-
 resource "google_compute_firewall" "ingress" {
   for_each = local.ingress_rules
 
@@ -87,14 +37,15 @@ resource "google_compute_firewall" "ingress" {
 }
 
 # COMPUTE
-
 resource "google_compute_address" "main" {
-  name        = "${var.project_name}-ip"
-  description = "Static IP for ${var.project_name} instance"
+  count       = var.instance_count
+  name        = "${var.project_name}-ip-${count.index}"
+  description = "Static IP for ${var.project_name} instance ${count.index}"
 }
 
 resource "google_compute_instance" "main" {
-  name         = "${var.project_name}-instance"
+  count        = var.instance_count
+  name         = "${var.project_name}-instance-${count.index}"
   machine_type = var.machine_type
   zone         = var.zone
 
@@ -103,9 +54,9 @@ resource "google_compute_instance" "main" {
 
   boot_disk {
     initialize_params {
-      image = var.boot_image
-      size  = var.disk_size_gb
-      type  = var.disk_type
+      image  = var.boot_image
+      size   = var.disk_size_gb
+      type   = var.disk_type
       labels = local.common_labels
     }
   }
@@ -114,7 +65,7 @@ resource "google_compute_instance" "main" {
     subnetwork = google_compute_subnetwork.main.id
 
     access_config {
-      nat_ip = google_compute_address.main.address
+      nat_ip = google_compute_address.main[count.index].address
     }
   }
 
@@ -140,7 +91,7 @@ resource "google_compute_instance" "main" {
   }
 
   lifecycle {
-    prevent_destroy = false  # Set to true in production
+    prevent_destroy = false
     ignore_changes  = [metadata_startup_script]
   }
 

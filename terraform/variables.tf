@@ -1,3 +1,9 @@
+variable "instance_count" {
+  description = "Number of instances to deploy"
+  type        = number
+  default     = 1
+}
+
 variable "project_id" {
   description = "GCP Project ID"
   type        = string
@@ -36,7 +42,7 @@ variable "ssh_user" {
 variable "ssh_public_key_path" {
   description = "Path to SSH public key"
   type        = string
-  default     = "~/.ssh/id_rsa.pub"
+  default     = "../cloud_1-key.pub"
 }
 
 

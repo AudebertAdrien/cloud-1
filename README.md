@@ -1,143 +1,135 @@
-# Cloud-1 ☁️
+# Cloud-1
 
-Automated deployment of a secure WordPress infrastructure on a remote cloud server (GCP) using Ansible and Docker.
+Automated deployment of a WordPress stack on GCP using Terraform, Ansible and Docker.
 
-The deployment follows the "Inception" architecture:
-
-- Nginx (Reverse Proxy & TLS)
-- WordPress + MariaDB
-- Self-signed TLS Certificates
+The stack runs the "Inception" architecture: Nginx as a reverse proxy with TLS termination, WordPress (php-fpm), MariaDB, and phpMyAdmin — each in its own container.
 
 ## Prerequisites
 
-Before starting, ensure you have:
+- [Terraform](https://developer.hashicorp.com/terraform/install) installed
+- Python 3 with a virtual environment (Ansible runs inside it)
+- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/) installed (`pip install ansible`)
+- A GCP project with billing enabled
+- `gcloud` CLI authenticated (`gcloud auth application-default login`)
+- GNU Make
 
-- Ansible and Make installed on your local machine.
-- A running Cloud Instance (Debian 12 or Ubuntu 20.04+).
-- Inbound Ports allowed on your cloud provider firewall:
-  - 80 (HTTP)
-  - 443 (HTTPS)
+> **Note:** Make sure your virtual environment is activated before running any `make` target that uses Ansible (`install`, `secrets-view`, `secrets-edit`).
 
 ## Quick Start
 
-### 1. SSH Key Setup
-
-You need to generate a dedicated SSH key for this project and upload the public part to your cloud provider for secure authentication.
-
-#### A. Generate the key:
+### 1. Generate an SSH key
 
 ```bash
 make key
 ```
 
-This will create `cloud_1-key` (private) and `cloud_1-key.pub` (public).
+This creates `cloud_1-key` (private) and `cloud_1-key.pub` (public) in the project root. Terraform will automatically provision this key on the instance.
 
-#### B. Authorize the key:
+### 2. Configure Terraform variables
 
-Copy the content of the public key:
+Copy the example and fill in your GCP project ID:
 
 ```bash
-cat cloud_1-key.pub
+cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 ```
 
-Go to your Cloud Provider (GCP) and add this key to your instance.
+Edit `terraform/terraform.tfvars` with your values. At minimum you need `project_id`.
 
-### 2. Configuration
+### 3. Set up Ansible Vault
 
-Open the Makefile at the root of the project and edit the top variable with your instance IP:
+This project encrypts sensitive data (database passwords) with Ansible Vault.
 
-```
-HOST_IP = 34.155.XXX.XXX    # Replace with your Instance Public IP
-```
+1. Get the vault password from your project administrator.
+2. Create a `.vault_pass` file at the project root containing only the password:
 
-### 3. Inventory Setup
-
-Update the Ansible inventory file with your instance IP address.
-
-Open `inventory.yml` and replace the IP address in the `ansible_host` field:
-
-Example:
-
-```yaml
-ansible_host: 34.155.XXX.XXX    # Replace with your Instance Public IP
+```bash
+echo "your-vault-password" > .vault_pass
+chmod 600 .vault_pass
 ```
 
-### 4. Secrets Management (Ansible Vault)
+This file is git-ignored and must be created manually on each machine.
 
-This project uses Ansible Vault to encrypt sensitive data (passwords, API keys).
-
-#### A. Setup the Vault Password:
-
-1. Ask the project administrator for the Vault Password.
-2. Create a file named `.vault_pass` at the root of the project.
-3. Paste the password inside (no spaces, no new lines).
-
-#### B. View Secrets (Optional):
-
-If you want to view the encrypted variables:
+To view or edit the encrypted secrets:
 
 ```bash
 make secrets-view
-```
-
-#### C. Edit Secrets (Optional):
-
-If you have the correct `.vault_pass` file, you can edit the encrypted variables:
-
-```bash
 make secrets-edit
 ```
 
-### 5. Deployment
+### 4. Provision the infrastructure
 
-Once configuration is done, launch the automated installation:
+```bash
+make tf-init      # Initialize Terraform providers
+make tf-apply     # Create the GCP instance, network, firewall rules
+```
+
+After `terraform apply` completes, the instance IP is stored in the Terraform state. All subsequent `make` commands (`install`, `ssh`, etc.) automatically read it from there — no manual copy-pasting needed.
+
+### 5. Deploy the stack
 
 ```bash
 make install
 ```
 
-Ansible will automatically:
-
-- Configure the server and install Docker.
-- Set up the firewall (UFW).
-- Generate self-signed TLS certificates.
-- Start the container stack.
+This runs the Ansible playbook which will:
+- Update the system and install dependencies
+- Configure the firewall (UFW) — only ports 22, 80, 443 open
+- Install Docker
+- Generate self-signed TLS certificates
+- Deploy and start the container stack
 
 ## Access
 
-### Web Access
-
-Open your browser and navigate to:
+### WordPress
 
 ```
-https://<YOUR_HOST_IP>
+https://<INSTANCE_IP>
 ```
 
-**Note:** Since the SSL certificate is self-signed, your browser will display a security alert. This is expected. Click **Advanced → Proceed** (or "Accept Risk") to access the site.
+The certificate is self-signed, so your browser will show a security warning. Click **Advanced > Proceed** to continue.
 
-### Server Access
+### phpMyAdmin
 
-To connect to your server via SSH using the project key:
+```
+https://<INSTANCE_IP>/phpmyadmin/
+```
+
+### SSH
 
 ```bash
 make ssh
 ```
 
-## Troubleshooting & Utilities
+## Available Make targets
 
-**SSH Connection Issues:**
+| Target | Description |
+|---|---|
+| `make key` | Generate the SSH keypair |
+| `make tf-init` | Initialize Terraform |
+| `make tf-plan` | Preview infrastructure changes |
+| `make tf-apply` | Apply infrastructure changes |
+| `make tf-destroy` | Tear down all GCP resources |
+| `make install` | Run the Ansible playbook |
+| `make ssh` | SSH into the instance |
+| `make secrets-view` | View encrypted Ansible secrets |
+| `make secrets-edit` | Edit encrypted Ansible secrets |
+| `make clean_known_hosts` | Remove the instance IP from `~/.ssh/known_hosts` |
+| `make clean` | Destroy infrastructure, clean known_hosts, and remove SSH keys |
 
-- If you reboot your instance (IP change) or regenerate your keys, you might encounter a "Remote Host Identification Changed" error due to a host fingerprint mismatch.
+## Troubleshooting
 
-- Or if you encounter this kind of message
+If you see this after redeploying or changing IPs:
+
 ```
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 @    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ```
 
-Run this command to clean your local `known_hosts` file for this specific IP:
+Run:
 
 ```bash
 make clean_known_hosts
 ```
+
+This removes the old fingerprint from your local `known_hosts` so SSH can connect again.

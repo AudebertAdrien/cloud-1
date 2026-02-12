@@ -1,12 +1,12 @@
-all: 
+all:
   hosts:
-    instance_1:
+    cloud_1_instance_1:
       ansible_host: XX.XX.XX.XX
 
   children:
     prod:
       hosts:
-        instance_1:
+        cloud_1_instance_1:
 
   vars:
     ansible_user: cloud_1-user
