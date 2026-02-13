@@ -2,20 +2,19 @@
 
 Automated deployment of a WordPress stack on GCP using Terraform, Ansible and Docker.
 
-The stack runs the "Inception" architecture: Nginx as a reverse proxy with TLS termination, WordPress (php-fpm), MariaDB, and phpMyAdmin — each in its own container.
+The stack follows the "Inception" architecture: Nginx handles reverse proxying and TLS, WordPress runs with php-fpm, MariaDB is the database, and phpMyAdmin is available for DB management. Each service runs in its own container.
 
 ## Prerequisites
 
-- [Terraform](https://developer.hashicorp.com/terraform/install) installed
-- Python 3 with a virtual environment (Ansible runs inside it)
-- [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/) installed (`pip install ansible`)
+- [Terraform](https://developer.hashicorp.com/terraform/install)
+- Python 3 + a virtual environment with [Ansible](https://docs.ansible.com/ansible/latest/installation_guide/) (`pip install ansible`)
 - A GCP project with billing enabled
 - `gcloud` CLI authenticated (`gcloud auth application-default login`)
 - GNU Make
 
-> **Note:** Make sure your virtual environment is activated before running any `make` target that uses Ansible (`install`, `secrets-view`, `secrets-edit`).
+Don't forget to activate your venv before running anything Ansible-related (`install`, `secrets-view`, `secrets-edit`).
 
-## Quick Start
+## Getting started
 
 ### 1. Generate an SSH key
 
@@ -23,33 +22,28 @@ The stack runs the "Inception" architecture: Nginx as a reverse proxy with TLS t
 make key
 ```
 
-This creates `cloud_1-key` (private) and `cloud_1-key.pub` (public) in the project root. Terraform will automatically provision this key on the instance.
+Creates `cloud_1-key` and `cloud_1-key.pub` in the project root. Terraform uses this key to set up SSH access on the instances.
 
 ### 2. Configure Terraform variables
-
-Copy the example and fill in your GCP project ID:
 
 ```bash
 cp terraform/terraform.tfvars.example terraform/terraform.tfvars
 ```
 
-Edit `terraform/terraform.tfvars` with your values. At minimum you need `project_id`.
+Edit `terraform/terraform.tfvars` with your values. At minimum you need `project_id`. You can also set `instance_count` to deploy multiple servers (defaults to 1).
 
 ### 3. Set up Ansible Vault
 
-This project encrypts sensitive data (database passwords) with Ansible Vault.
-
-1. Get the vault password from your project administrator.
-2. Create a `.vault_pass` file at the project root containing only the password:
+Database passwords and other secrets are encrypted with Ansible Vault. You need to create a `.vault_pass` file containing the vault password:
 
 ```bash
 echo "your-vault-password" > .vault_pass
 chmod 600 .vault_pass
 ```
 
-This file is git-ignored and must be created manually on each machine.
+This file is git-ignored, so you'll have to create it on every machine. Ask your project admin for the password if you don't have it.
 
-To view or edit the encrypted secrets:
+You can inspect or modify the secrets with:
 
 ```bash
 make secrets-view
@@ -59,11 +53,11 @@ make secrets-edit
 ### 4. Provision the infrastructure
 
 ```bash
-make tf-init      # Initialize Terraform providers
-make tf-apply     # Create the GCP instance, network, firewall rules
+make tf-init
+make tf-apply
 ```
 
-After `terraform apply` completes, the instance IP is stored in the Terraform state. All subsequent `make` commands (`install`, `ssh`, etc.) automatically read it from there — no manual copy-pasting needed.
+This creates the VPC, firewall rules, static IPs, and compute instances on GCP. All the IPs are stored in Terraform state and picked up automatically by the other `make` targets.
 
 ### 5. Deploy the stack
 
@@ -71,54 +65,61 @@ After `terraform apply` completes, the instance IP is stored in the Terraform st
 make install
 ```
 
-This runs the Ansible playbook which will:
-- Update the system and install dependencies
-- Configure the firewall (UFW) — only ports 22, 80, 443 open
-- Install Docker
+This generates the Ansible inventory from Terraform output, then runs the playbook on all instances in parallel. It will:
+- Wait for the startup script to finish, then update apt
+- Configure UFW (only ports 22, 80, 443 open)
+- Install Docker and Docker Compose
 - Generate self-signed TLS certificates
-- Deploy and start the container stack
+- Deploy the container stack with docker compose
 
-## Access
+Once done, the command prints the URLs for each instance.
 
-### WordPress
+## Accessing the services
 
-```
-https://<INSTANCE_IP>
-```
+After a successful deploy, each instance exposes:
 
-The certificate is self-signed, so your browser will show a security warning. Click **Advanced > Proceed** to continue.
+- **WordPress** at `https://<IP>/`
+- **phpMyAdmin** at `https://<IP>/phpmyadmin/`
 
-### phpMyAdmin
+The certificate is self-signed, so your browser will warn you. Just click through it.
 
-```
-https://<INSTANCE_IP>/phpmyadmin/
-```
-
-### SSH
+To SSH into an instance:
 
 ```bash
-make ssh
+make ssh          # connects to the first instance
+make ssh N=1      # connects to the second instance
 ```
 
-## Available Make targets
+## Multi-server deployment
+
+To deploy on multiple servers, set `instance_count` in your `terraform.tfvars`:
+
+```hcl
+instance_count = 3
+```
+
+Then run `make tf-apply && make install`. Terraform creates 3 instances with their own static IPs, and Ansible provisions all of them in parallel. Each instance runs an independent copy of the full WordPress stack.
+
+## Make targets
 
 | Target | Description |
 |---|---|
 | `make key` | Generate the SSH keypair |
 | `make tf-init` | Initialize Terraform |
 | `make tf-plan` | Preview infrastructure changes |
-| `make tf-apply` | Apply infrastructure changes |
+| `make tf-apply` | Create/update GCP resources |
 | `make tf-destroy` | Tear down all GCP resources |
-| `make install` | Run the Ansible playbook |
-| `make ssh` | SSH into the instance |
+| `make inventory` | Generate the Ansible inventory from Terraform output |
+| `make install` | Generate inventory + run the Ansible playbook |
+| `make ssh` | SSH into an instance (`N=0` by default) |
 | `make secrets-view` | View encrypted Ansible secrets |
 | `make secrets-edit` | Edit encrypted Ansible secrets |
-| `make clean_known_hosts` | Remove the instance IP from `~/.ssh/known_hosts` |
-| `make clean` | Destroy infrastructure, clean known_hosts, and remove SSH keys |
+| `make clean_known_hosts` | Remove instance IPs from `~/.ssh/known_hosts` |
+| `make clean` | Destroy everything: infra, known_hosts, SSH keys, inventory |
 
 ## Troubleshooting
 
-If you see this after redeploying or changing IPs:
+If you get this after redeploying or changing IPs:
 
 ```
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -126,10 +127,4 @@ If you see this after redeploying or changing IPs:
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 ```
 
-Run:
-
-```bash
-make clean_known_hosts
-```
-
-This removes the old fingerprint from your local `known_hosts` so SSH can connect again.
+Just run `make clean_known_hosts` to clear the old fingerprints.

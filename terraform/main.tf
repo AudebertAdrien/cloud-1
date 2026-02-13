@@ -1,3 +1,5 @@
+# === Main Infrastructure code for provisionning of resources === #
+
 # NETWORKING
 resource "google_compute_network" "main" {
   name                    = "${var.project_name}-vpc"
