@@ -1,3 +1,20 @@
+# Secrets & keys
 .vault_pass
 cloud_1-key
 cloud_1-key.pub
+
+# Terraform
+terraform/.terraform/
+terraform/.terraform.lock.hcl
+terraform/terraform.tfstate
+terraform/terraform.tfstate.backup
+terraform/terraform.tfvars
+
+# Ansible
+inventory
+log/
+
+# Python
+venv/
+__pycache__/
+*.pyc
