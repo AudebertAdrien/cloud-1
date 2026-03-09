@@ -2,7 +2,7 @@ SECRETS_DRAFT := secrets.template.yml
 SECRETS_FINAL := roles/cloud_1/vars/main.yml
 VAULT_PASS := .vault_pass
 
-SSH_USER := cloud_1-user
+SSH_USER := kquetat-
 
 INVENTORY := inventory
 PLAYBOOK := provisioning.yml
