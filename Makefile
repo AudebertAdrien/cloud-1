@@ -71,6 +71,7 @@ secrets-edit:
 	@ansible-vault edit roles/cloud_1/vars/secrets.yml
 
 install: inventory
+	@mkdir -p log
 	@echo "Launching provisioning..."
 	ansible-playbook -i $(INVENTORY) $(PLAYBOOK)
 	@echo ""

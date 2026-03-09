@@ -1,5 +1,9 @@
 ---
-- name: Wait for startup script to release apt lock
+- name: Wait for cloud-init to finish
+  ansible.builtin.command: cloud-init status --wait
+  changed_when: false
+
+- name: Wait for apt locks to be released
   ansible.builtin.shell: |
     while fuser /var/lib/dpkg/lock-frontend >/dev/null 2>&1 || \
           fuser /var/lib/dpkg/lock >/dev/null 2>&1 || \
