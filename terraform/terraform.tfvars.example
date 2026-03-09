@@ -1,0 +1,9 @@
+instance_count      =
+project_id          =
+project_name        =
+region              =
+zone                =
+machine_type        =
+ssh_user            =
+ssh_public_key_path =
+boot_image          =

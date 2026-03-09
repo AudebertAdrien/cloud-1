@@ -1,4 +1,8 @@
 ---
+- name: Wait for startup script to release apt lock
+  ansible.builtin.shell: while fuser /var/lib/apt/lists/lock >/dev/null 2>&1; do sleep 2; done
+  changed_when: false
+
 - name: Update apt cache
   ansible.builtin.apt:
     update_cache: yes
